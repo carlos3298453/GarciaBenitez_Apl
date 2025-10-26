@@ -20,3 +20,5 @@ Route::post('/nuevazona', [zonaController::class, 'crearZona']);
 Route::post('/nuevousuario', [AuthController::class, 'nuevoUsuario']);
 
 Route::post('/login', [AuthController::class, 'login']);
+
+Route::middleware('auth:sanctum')->get('/usuario', [AuthController::class, 'usuario']);
