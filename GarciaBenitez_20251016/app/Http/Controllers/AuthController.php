@@ -20,7 +20,7 @@ class AuthController extends Controller {
         try {
             $validated = $request->validate([
                 'name' => 'required|string|max:100',
-                'email' => 'required|string|email|max:100|unique:users, email',
+                'email' => 'required|string|email|max:100|unique:users,email',
                 'password' => 'required|string|min:8|max:20'
             ]);
 
@@ -142,6 +142,67 @@ class AuthController extends Controller {
             $satisfactorio = false;
             $estado = 500;
             $mensaje = "Error en el servidor";
+            $errores = [
+                "code" => 500,
+                "msg" => $e->getMessage()
+            ];
+        }
+
+        $respuesta = [
+            "success" => $satisfactorio,
+            "status" => $estado,
+            "msg" => $mensaje,
+            "data" => $valores,
+            "errors" => $errores,
+            "count" => sizeof($valores)
+        ];
+
+        return response()->json($respuesta, 200);
+    }
+
+    public function usuario(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $satisfactorio = false;
+        $estado = 0;
+        $mensaje = "";
+        $errores = [];
+        $valores = [];
+
+        try {
+            $user = $request->user();
+
+            if($user) {
+                $valores = [
+                    "id" => $user->id,
+                    "name" => $user->name,
+                    "email" => $user->email,
+                    "email_verified_at" => $user->email_verified_at,
+                    "created_at" => $user->created_at,
+                    "updated_at" => $user->updated_at
+                ];
+
+                $satisfactorio = true;
+                $estado = 200;
+                $mensaje = "Usuario autenticado encontrado";
+                $errores = [
+                    "code" => 200,
+                    "msg" => ""
+                ];
+            }
+            else {
+                $satisfactorio = false;
+                $estado = 401;
+                $mensaje = "Token inválido o usuario no autenticado";
+                $errores = [
+                    "code" => 401,
+                    "msg" => "El token no corresponde a un usuario válido"
+                ];
+            }
+        }
+        catch (\Exception $e) {
+            $satisfactorio = false;
+            $estado = 500;
+            $mensaje = "Error al obtener los datos del usuario";
             $errores = [
                 "code" => 500,
                 "msg" => $e->getMessage()
